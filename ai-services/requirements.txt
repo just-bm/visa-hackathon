@@ -3,3 +3,6 @@ pydantic
 langchain-groq
 pydantic
 python-dotenv
+uvicorn
+langchain_core
+langchain
