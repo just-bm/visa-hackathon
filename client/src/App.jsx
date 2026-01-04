@@ -2,34 +2,36 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import Navbar from './components/Navbar'
+import Csv from './pages/Csv'
 
+import LenisScroll from './components/lenis-scroll'
+import Table from './pages/Table'
+import { Routes } from 'react-router'
+import { Route } from 'react-router'
+import Api from './pages/Api'
 function App() {
-  const [count, setCount] = useState(0)
+  const handleFinishedAnalysis = (data) => {
+    console.log("Analysis received:", data);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      
+        <LenisScroll />
+        <Navbar />
+        <Routes>
+          <Route path="/csv" element={<Csv  onResult={handleFinishedAnalysis} />}/>
+        
+        <Route path="/table" element={<Table onResult={handleFinishedAnalysis} />}/>
+        <Route path="/api" element={<Api onResult={handleFinishedAnalysis} />}/>
+        </Routes>
+      
+        
+     
+    </div>
+  );
 }
 
 export default App
+
