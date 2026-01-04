@@ -7,6 +7,10 @@ export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navlinks = [
         {
+            href: "",
+            text: "Home",
+        },
+        {
             href: "csv",
             text: "CSV",
         },
@@ -18,10 +22,7 @@ export default function Navbar() {
             href: "api",
             text: "API",
         },
-        // {
-        //     href: "#contact",
-        //     text: "Test",
-        // },
+        
     ];
     return (
         <>

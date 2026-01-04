@@ -10,6 +10,7 @@ import Table from './pages/Table'
 import { Routes } from 'react-router'
 import { Route } from 'react-router'
 import Api from './pages/Api'
+import Home from './pages/Home'
 function App() {
   const handleFinishedAnalysis = (data) => {
     console.log("Analysis received:", data);
@@ -25,6 +26,7 @@ function App() {
         
         <Route path="/table" element={<Table onResult={handleFinishedAnalysis} />}/>
         <Route path="/api" element={<Api onResult={handleFinishedAnalysis} />}/>
+        <Route path="/" element={<Home />}/>
         </Routes>
       
         

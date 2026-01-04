@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MenuIcon, XIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
