@@ -4,7 +4,7 @@ import SubscribeNewsletter from "../sections/subscribe-newsletter";
 import TrustedCompanies from "../sections/trusted-companies";
 import Footer from "../components/footer";
 import LenisScroll from "../components/lenis-scroll";
-import Navbar from "../components/Navbar";
+
 import AboutOurApps from "../sections/about-our-apps";
 import HeroSection from "../sections/hero-section";
 import OurLatestCreation from "../sections/our-latest-creation";
