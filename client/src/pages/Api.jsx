@@ -1,27 +1,38 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {apiData, getTableData} from "../api/api.js";
-import { Database, Table as TableIcon, Link2, CheckCircle, BarChart3, ShieldCheck, ChevronRight, Sparkles, Loader2 } from "lucide-react";
-// Assuming you have a similar API call for DBs
-// import { evaluateDatabase } from "../api/api.js";
+import { apiData } from "../api/api.js";
+import { Database, Link2, ShieldCheck, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 
 const Api = ({ onResult }) => {
   const [apiLink, setapiLink] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleConnect = async () => {
-    if (!apiLink ) return;
+    if (!apiLink) return;
     setLoading(true);
+    
     try {
-        
-      // Logic for your database evaluation API
-      // const result = await evaluateDatabase(dbLink, tableName);
-      // if (onResult) onResult(result);
-      console.log("Connecting to:", apiLink);
-      const data = await apiData({ apiUrl:apiLink});
-      console.log(data)
+      // API call to fetch data
+      const data = await apiData({ apiUrl: apiLink });
+      
+      // Artificial delay for the "Analysis" feel
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.success("Connection successful");
+      
+      // Update parent state if callback provided
+      if (onResult) onResult(data);
+
+      // Navigate to results page passing the data in state
+      navigate("/result`", { state: { data: data } });
+      
+      console.log("Analysis Received:", data);
     } catch (err) {
       console.error("Connection failed", err);
+      toast.error("Connection failed. Please check the API endpoint.");
     } finally {
       setLoading(false);
     }
@@ -58,13 +69,13 @@ const Api = ({ onResult }) => {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
             >
               <Sparkles className="size-3" />
-              Live DB Orchestration
+              Live API Orchestration
             </motion.div>
             <motion.h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50">
-              Direct <span className="text-indigo-500 italic">Database</span> Audit
+              Direct <span className="text-indigo-500 italic">Endpoint</span> Audit
             </motion.h1>
             <motion.p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-              Connect your PostgreSQL instance directly for real-time transaction monitoring and structural integrity reporting.
+              Connect your production API endpoints directly for real-time payload monitoring and structural integrity reporting.
             </motion.p>
           </div>
 
@@ -75,33 +86,19 @@ const Api = ({ onResult }) => {
                 <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
                 
                 <div className="space-y-8 relative">
-                  {/* DB Link Input */}
+                  {/* API Link Input */}
                   <div className="space-y-3">
                     <label className="flex items-center gap-2 text-sm font-medium text-slate-300 ml-1">
-                      <Link2 className="size-4 text-indigo-400" /> Connection String
+                      <Link2 className="size-4 text-indigo-400" /> API Endpoint URL
                     </label>
                     <input 
                       type="text" 
-                        placeholder="https://api.example.com"
+                      placeholder="https://api.example.com/v1/data"
                       value={apiLink}
                       onChange={(e) => setapiLink(e.target.value)}
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
                     />
                   </div>
-
-                  {/* Table Name Input */}
-                  {/* <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-medium text-slate-300 ml-1">
-                      <TableIcon className="size-4 text-indigo-400" /> Target Table
-                    </label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. public.transactions"
-                      value={tableName}
-                      onChange={(e) => setTableName(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                    />
-                  </div> */}
 
                   {/* Submit Button */}
                   <button 
@@ -110,7 +107,10 @@ const Api = ({ onResult }) => {
                     className="w-full group relative flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-900/50 disabled:text-slate-500 text-white font-bold py-5 rounded-2xl transition-all shadow-xl shadow-indigo-600/20 active:scale-[0.98]"
                   >
                     {loading ? (
-                      <Loader2 className="size-5 animate-spin" />
+                      <>
+                        <Loader2 className="size-5 animate-spin" />
+                        Analyzing Stream...
+                      </>
                     ) : (
                       <>
                         Initialize Audit
@@ -130,9 +130,9 @@ const Api = ({ onResult }) => {
                 </h4>
                 <ul className="space-y-4">
                   {[
-                    "Read-only access required",
+                    "REST/GraphQL Support",
                     "SSL/TLS Encryption support",
-                    "PostgreSQL 12.0+ supported",
+                    "JSON Payload Parsing",
                     "Automatic Schema Mapping"
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-slate-400 text-sm">
@@ -149,7 +149,7 @@ const Api = ({ onResult }) => {
                     <span className="font-bold text-sm uppercase tracking-wider">Zero-Storage</span>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed italic">
-                  "Your credentials are encrypted in transit and never persisted. Analysis runs against a volatile execution layer."
+                  "Your endpoints are analyzed in real-time. We never cache or store the data payloads passing through the audit pipeline."
                 </p>
               </div>
             </div>
