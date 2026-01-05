@@ -39,7 +39,7 @@ const Csv = ({ onResult }) => {
     setLoading(true);
     try {
       const result = await evaluateDataset(file);
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       if (onResult) onResult(result);
       navigate('/result', { state: { data: result } });
     } catch (err) {
