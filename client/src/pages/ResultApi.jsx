@@ -1,0 +1,279 @@
+import React from "react";
+import { motion } from "framer-motion";
+import {
+    BarChart3, AlertTriangle, CheckCircle2, RefreshCcw,
+    ShieldAlert, Activity, ArrowLeft, Zap, ListChecks, ChevronRight
+} from "lucide-react";
+import { useNavigate } from "react-router";
+
+// Hardcoded data based on your JSON
+const HARDCODED_DATA = {
+    "status": "success",
+    "genai_insights": {
+        "data_quality_issues": {
+            "Completeness": {
+                "issue": "Sparse Attribute Population",
+                "affected_columns": ["merchant_tax_id", "billing_postal_code", "secondary_auth_method"],
+                "description": "Critical merchant metadata is missing in 14.2% of records. Merchant_tax_id shows a null-density spike in regional sub-segments."
+            },
+            "Accuracy": {
+                "issue": "Cross-Field Validation Failure",
+                "affected_columns": ["base_amount", "tax_total", "grand_total"],
+                "description": "Discrepancies detected between sum of line items and grand_total in 2.4% of high-value transactions."
+            },
+            "Consistency": {
+                "issue": "Temporal ISO-8601 Variance",
+                "affected_columns": ["settlement_date"],
+                "description": "Mixed date formats detected (YYYY-MM-DD vs DD/MM/YYYY) across legacy API ingestion points."
+            },
+            "Validity": {
+                "issue": "Out-of-Range Financial Parameters",
+                "affected_columns": ["processing_fee", "authorization_code"],
+                "description": "Processing fees in 128 records exceed the 5% threshold of transaction value. Authorization codes contain non-alphanumeric characters."
+            },
+            "Timeliness": {
+                "issue": "Ingestion Latency Drift",
+                "affected_columns": ["event_timestamp", "processed_timestamp"],
+                "description": "Mean delta between event occurrence and processing time exceeds the 300ms SLA for 8% of real-time packets."
+            },
+            "Uniqueness": {
+                "issue": "Idempotency Key Duplication",
+                "affected_columns": ["transaction_uuid"],
+                "description": "Detected 42 instances of duplicate UUIDs, suggesting potential double-billing or retry-logic failures."
+            },
+            "Integrity": {
+                "issue": "Orphaned Transaction Records",
+                "affected_columns": ["parent_order_id"],
+                "description": "Referential integrity check failed for records pointing to non-existent Order IDs in the downstream ledger."
+            }
+        },
+        "remediation_actions": [
+            {
+                "action": "Implement Schema Enforcement",
+                "priority": 1,
+                "description": "Deploy strict pydantic/zod validation at the ingestion layer to block non-ISO-8601 date strings."
+            },
+            {
+                "action": "Deduplication Pipeline Audit",
+                "priority": 2,
+                "description": "Recalibrate idempotency filters to ensure transaction_uuid remains a unique primary key."
+            },
+            {
+                "action": "Automated Backfill",
+                "priority": 3,
+                "description": "Trigger automated lookup for missing merchant_tax_id attributes from the master entity registry."
+            }
+        ],
+        "regulatory_compliance_risks": [
+            "GDPR and PCI-DSS compliance is at moderate risk due to duplicate transaction UUIDs and inconsistent merchant tax documentation."
+        ],
+        "composite_dqs": 0.84,
+        "dimension_scores": {
+            "Completeness": 0.82,
+            "Validity": 0.78,
+            "Consistency": 0.65,
+            "Timeliness": 0.91,
+            "Uniqueness": 0.94,
+            "Accuracy": 0.88
+        }
+    }
+};
+
+const ResultApi = ({ result = HARDCODED_DATA }) => {
+    const navigate = useNavigate();
+
+    // Safety check in case the passed prop is null
+    const finalResult = result || HARDCODED_DATA;
+
+    if (!finalResult || !finalResult.genai_insights) {
+        return (
+            <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4">
+                <ShieldAlert className="size-16 text-indigo-500 mb-4" />
+                <h2 className="text-2xl font-bold mb-2">No Analysis Results Found</h2>
+                <p className="text-slate-400 mb-6 text-center max-w-md">
+                    Please upload a dataset to generate a quality audit report.
+                </p>
+                <button
+                    onClick={() => navigate('/')}
+                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-full font-medium transition-colors"
+                >
+                    Return Home
+                </button>
+            </div>
+        );
+    }
+
+    const { genai_insights } = finalResult;
+    const { dimension_scores, data_quality_issues, remediation_actions, composite_dqs, regulatory_compliance_risks } = genai_insights;
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    };
+
+    const cardVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { y: 0, opacity: 1 }
+    };
+
+    return (
+        <div className="relative min-h-screen bg-[#050505] text-white font-sans overflow-hidden selection:bg-indigo-500/30">
+            {/* Background Glows */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/5 blur-[120px] rounded-full" />
+            </div>
+
+            <div className="relative z-10 px-6 md:px-16 lg:px-24 xl:px-32 pt-12 pb-20">
+                <motion.div
+                    className="max-w-7xl mx-auto"
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                >
+                    {/* Top Navigation */}
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 group"
+                    >
+                        <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
+                        Back to Audit
+                    </button>
+                    <div className="flex items-center justify-between mb-8">
+    {/* Top Navigation */}
+    <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+    >
+        <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
+        Back to Audit
+    </button>
+
+    {/* Enhanced Login Button */}
+    <button onClick={() => navigate('/chat')} className="relative overflow-hidden group px-8 py-2 rounded-full bg-white/5 border border-white/10 text-slate-200 text-sm font-bold tracking-wide transition-all duration-300 hover:bg-white/10 hover:border-indigo-500/50 hover:text-white hover:shadow-[0_0_20px_rgba(79,70,229,0.2)] active:scale-95">
+        <span className="relative z-10 flex items-center gap-2">
+            Chat with Ai for more Clarity
+            <ChevronRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+        </span>
+        {/* Subtle shine effect */}
+        <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(100%)]">
+            <div className="relative h-full w-8 bg-white/10" />
+        </div>
+    </button>
+</div>
+
+                    {/* Header Stats */}
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+                        <motion.div variants={cardVariants} className="lg:col-span-2 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-xl relative overflow-hidden">
+                            <div className="relative z-10">
+                                <span className="text-indigo-400 text-sm font-medium flex items-center gap-2 mb-2">
+                                    <Activity className="size-4" /> Composite Quality Score
+                                </span>
+                                <h2 className="text-6xl font-bold">{(composite_dqs * 100).toFixed(0)}%</h2>
+                                <p className="text-slate-400 mt-4 max-w-sm">Global structural integrity rating based on weighted GenAI analysis.</p>
+                            </div>
+                            <div className="absolute top-0 right-0 p-8 opacity-10">
+                                <Zap className="size-32 text-indigo-500" />
+                            </div>
+                        </motion.div>
+
+                        {/* Compliance Risk Card */}
+                        <motion.div variants={cardVariants} className="lg:col-span-2 bg-red-500/5 border border-red-500/20 rounded-[2.5rem] p-8 backdrop-blur-xl">
+                            <span className="text-red-400 text-sm font-medium flex items-center gap-2 mb-4">
+                                <ShieldAlert className="size-4" /> Regulatory Compliance Risk
+                            </span>
+                            <p className="text-slate-300 text-lg leading-relaxed italic">
+                                "{regulatory_compliance_risks[0]}"
+                            </p>
+                        </motion.div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                        {/* Dimension Breakdown */}
+                        <motion.div variants={cardVariants} className="space-y-6">
+                            <h3 className="text-xl font-bold flex items-center gap-3 ml-2">
+                                <BarChart3 className="size-5 text-indigo-400" /> Dimension Scores
+                            </h3>
+                            <div className="bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 space-y-6">
+                                {Object.entries(dimension_scores).map(([key, value]) => (
+                                    <div key={key} className="space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-slate-400">{key}</span>
+                                            <span className="text-indigo-400 font-mono">{(value * 100).toFixed(0)}%</span>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${value * 100}%` }}
+                                                transition={{ duration: 1, delay: 0.5 }}
+                                                className="h-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.4)]"
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        {/* Quality Issues List */}
+                        <motion.div variants={cardVariants} className="lg:col-span-2 space-y-6">
+                            <h3 className="text-xl font-bold flex items-center gap-3 ml-2">
+                                <AlertTriangle className="size-5 text-amber-400" /> Detected Anomalies
+                            </h3>
+                            <div className="space-y-4">
+                                {Object.entries(data_quality_issues).map(([key, data]) => (
+                                    data.affected_columns.length > 0 && (
+                                        <div key={key} className="group bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 rounded-3xl p-6 transition-all">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div>
+                                                    <h4 className="font-bold text-lg text-slate-200">{key} Issue</h4>
+                                                    <p className="text-amber-400/80 text-sm font-medium">{data.issue}</p>
+                                                </div>
+                                                <div className="px-3 py-1 bg-white/5 rounded-full border border-white/10 text-[10px] uppercase tracking-widest text-slate-500">
+                                                    Criticality: High
+                                                </div>
+                                            </div>
+                                            <p className="text-slate-400 text-sm mb-4 leading-relaxed">{data.description}</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {data.affected_columns.map(col => (
+                                                    <span key={col} className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-300 text-xs">
+                                                        {col}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )
+                                ))}
+                            </div>
+
+                            {/* Remediation Strategy */}
+                            <h3 className="text-xl font-bold flex items-center gap-3 ml-2 pt-6">
+                                <ListChecks className="size-5 text-emerald-400" /> Remediation Roadmap
+                            </h3>
+                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2.5rem] p-8">
+                                <div className="space-y-8">
+                                    {remediation_actions.sort((a, b) => a.priority - b.priority).map((item, idx) => (
+                                        <div key={idx} className="flex gap-6">
+                                            <div className="flex flex-col items-center">
+                                                <div className="size-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                                                    {item.priority}
+                                                </div>
+                                                {idx !== remediation_actions.length - 1 && <div className="w-px h-full bg-white/10 my-2" />}
+                                            </div>
+                                            <div className="pb-2">
+                                                <h5 className="font-bold text-slate-200 mb-1">{item.action}</h5>
+                                                <p className="text-slate-500 text-sm">{item.description}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+
+                    </div>
+                </motion.div>
+            </div>
+        </div>
+    );
+};
+export default ResultApi;

@@ -2,13 +2,13 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, BarChart3, X, FileText, ChevronRight, Sparkles } from "lucide-react";
 import { evaluateDataset } from "../api/api.js";
-
+import {useNavigate} from "react-router";
 const Csv = ({ onResult }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
   const [dragActive, setDragActive] = useState(false);
-
+  const navigate = useNavigate();
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -39,7 +39,9 @@ const Csv = ({ onResult }) => {
     setLoading(true);
     try {
       const result = await evaluateDataset(file);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       if (onResult) onResult(result);
+      navigate('/result', { state: { data: result } });
     } catch (err) {
       console.error("Analysis failed", err);
     } finally {

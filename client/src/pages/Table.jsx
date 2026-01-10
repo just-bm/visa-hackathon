@@ -1,27 +1,40 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {getTableData} from "../api/api.js";
-import { Database, Table as TableIcon, Link2, CheckCircle, BarChart3, ShieldCheck, ChevronRight, Sparkles, Loader2 } from "lucide-react";
-// Assuming you have a similar API call for DBs
-// import { evaluateDatabase } from "../api/api.js";
+import { getTableData } from "../api/api.js";
+import { Database, Table as TableIcon, Link2, ShieldCheck, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const Table = ({ onResult }) => {
   const [dbLink, setDbLink] = useState("");
   const [tableName, setTableName] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Correctly initialize navigate
 
   const handleConnect = async () => {
     if (!dbLink || !tableName) return;
+    
     setLoading(true);
     try {
-      // Logic for your database evaluation API
-      // const result = await evaluateDatabase(dbLink, tableName);
-      // if (onResult) onResult(result);
-      console.log("Connecting to:", dbLink, "Table:", tableName);
-      const data = getTableData({ dbLink, tableName });
-      console.log(data)
+      // 1. Fetch the data from your API
+      const result = await getTableData({ dbLink, tableName });
+      
+      // 2. Artificial delay for the "Analyzing" feel
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      console.log("Analysis Result:", result);
+
+      // 3. Update parent state if callback exists
+      if (onResult) onResult(result);
+      
+      toast.success("Audit initialized successfully");
+
+      // 4. Navigate and pass data via route state
+      navigate("/result.", { state: { data: result } });
+
     } catch (err) {
       console.error("Connection failed", err);
+      toast.error("Failed to connect to database. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -30,7 +43,7 @@ const Table = ({ onResult }) => {
   return (
     <div className="relative min-h-screen bg-[#050505] text-white font-sans overflow-hidden selection:bg-indigo-500/30">
       
-      {/* Background Glow - Consistent with Csv Component */}
+      {/* Background Glow */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <svg className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[140%] opacity-50" viewBox="0 0 1440 676" fill="none">
           <rect x="-92" y="-948" width="1624" height="1624" rx="812" fill="url(#db-gradient)" />
@@ -110,7 +123,10 @@ const Table = ({ onResult }) => {
                     className="w-full group relative flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-900/50 disabled:text-slate-500 text-white font-bold py-5 rounded-2xl transition-all shadow-xl shadow-indigo-600/20 active:scale-[0.98]"
                   >
                     {loading ? (
-                      <Loader2 className="size-5 animate-spin" />
+                      <>
+                        <Loader2 className="size-5 animate-spin" />
+                        Analyzing Schema...
+                      </>
                     ) : (
                       <>
                         Initialize Audit
