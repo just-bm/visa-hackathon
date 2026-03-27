@@ -26,7 +26,7 @@ export default function HeroSection() {
                 transition={{ delay: 0.2, type: "spring", stiffness: 320, damping: 70, mass: 1 }}
             >
                 <div className="size-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Book a live demo today</span>
+                <span>Audit your dataset with DQS-AI Agent</span>
             </motion.a>
             <motion.h1 className="text-center text-5xl leading-[68px] md:text-6xl md:leading-[70px] mt-4 font-semibold max-w-2xl"
                 initial={{ y: 50, opacity: 0 }}

@@ -16,6 +16,7 @@ async def root():
             "/chat", 
             "/chat/stream", 
             "/export-report", 
-            "/health"
+            "/health",
+            "/docs"
         ]
     }

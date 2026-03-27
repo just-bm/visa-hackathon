@@ -12,3 +12,28 @@ body {
 button {
     @apply cursor-pointer;
 }
+
+/* Chat Markdown Styling */
+.prose table {
+    @apply w-full border-collapse my-4 text-xs table-fixed;
+}
+.prose th, .prose td {
+    @apply border border-white/10 p-1.5 text-left align-top leading-tight;
+}
+.prose th {
+    @apply bg-white/5 font-bold text-indigo-400;
+}
+.prose ul, .prose ol {
+    @apply my-2 ml-4 list-disc;
+}
+.prose p {
+    @apply my-1 leading-relaxed;
+}
+.prose strong {
+    @apply text-indigo-300 font-bold;
+}
+
+/* Ensure images/videos in chat don't overflow */
+.prose img, .prose video {
+    @apply max-w-full rounded-xl border border-white/10;
+}

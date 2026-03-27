@@ -3,106 +3,113 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Send, Bot, User, Sparkles, Trash2, Loader2 
 } from "lucide-react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { HARDCODED_DATA } from "./Result";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { chatWithAIStream } from "../api/api";
 
 const Chatbot = ({ auditContext }) => {
-  const [messages, setMessages] = useState([
-    { role: "bot", content: "Audit complete. I've analyzed your data. How can I help you interpret these findings?" }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("dqs_chat_history");
+    return saved ? JSON.parse(saved) : [
+      { role: "bot", content: "Audit complete. I've analyzed your data. How can I help you interpret these findings?" }
+    ];
+  });
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
-  // Initialize Gemini (In production, use a backend proxy to hide this key!)
-  const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
+  // Persist chat history
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    localStorage.setItem("dqs_chat_history", JSON.stringify(messages));
+  }, [messages]);
+
+  // Robust Auto-scroll logic
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }, [messages, isTyping]);
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
 
-    const userMessage = { role: "user", content: input };
+    const currentInput = input;
+    const userMessage = { role: "user", content: currentInput };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
 
+    // Initial bot message for streaming
+    setMessages((prev) => [...prev, { role: "bot", content: "" }]);
+
     try {
-      // Create a context-aware prompt
-      const systemPrompt = `
-        You are an expert Data Quality Auditor. 
-        Context of the current audit:
-        - Composite Quality Score: ${72}%
-        - Dimension Scores: ${62}
-        - Detected Issues: ${12}
-        - Regulatory Risks: ${15}
-        
-        Answer user questions based on this data. Be concise, technical, and helpful.
-         txn_id,customer_id,amount,currency,kyc_address,txn_timestamp,status
-TXN1001,CUST_001,500.00,INR,123 Maple St,2025-12-01T10:00:00Z,SUCCESS
-TXN1002,CUST_002,1200.50,inr,456 Oak Ave,2025-12-01T11:30:00Z,SUCCESS
-TXN1003,,250.00,INR,789 Pine Rd,2025-12-02T09:15:00Z,FAILED
-TXN1004,CUST_004,-50.00,INR,321 Birch Ln,2025-12-02T14:00:00Z,SUCCESS
-TXN1005,CUST_001,500.00,inr,,2025-12-03T08:45:00Z,SUCCESS
-TXN1006,CUST_006,75.25,INR,,2025-12-03T16:20:00Z,SUCCESS
-TXN1007,CUST_007,1200.50,INR,654 Cedar Ct,2026-05-15T12:00:00Z,SUCCESS
-TXN1008,CUST_008,300.00,inr,,2010-01-01T10:00:00Z,SUCCESS
-TXN1009,CUST_009,,INR,987 Elm Blvd,2025-12-04T10:10:00Z,PENDING
-TXN1010,CUST_001,500.00,INR,123 Maple St,2025-12-04T11:00:00Z,SUCCESS
-TXN1011,CUST_011,150.00,inr,,2025-12-04T12:00:00Z,SUCCESS
-TXN1012,CUST_012,2200.00,INR,111 Spruce Dr,2025-12-05T09:00:00Z,SUCCESS
-TXN1013,CUST_002,1200.50,INR,,2025-12-05T10:00:00Z,SUCCESS
-TXN1014,CUST_014,-10.00,inr,222 Walnut St,2025-12-05T14:30:00Z,SUCCESS
-TXN1015,CUST_015,300.00,INR,,2025-12-06T11:00:00Z,SUCCESS
-TXN1016,CUST_016,450.00,INR,333 Cherry Ln,2026-08-20T10:00:00Z,SUCCESS
-TXN1017,CUST_017,890.00,inr,,2025-12-06T15:00:00Z,SUCCESS
-TXN1018,CUST_018,1200.50,INR,444 Ash Rd,2015-05-20T08:00:00Z,SUCCESS
-TXN1019,CUST_019,500.00,INR,,2025-12-07T12:00:00Z,SUCCESS
-TXN1020,CUST_020,10.00,inr,555 Willow St,2025-12-07T13:00:00Z,SUCCESS
-TXN1021,CUST_001,500.00,INR,123 Maple St,2025-12-07T14:00:00Z,SUCCESS
-TXN1022,CUST_022,300.00,INR,,2025-12-08T09:00:00Z,SUCCESS
-TXN1023,CUST_023,75.25,inr,666 Poplar Dr,2025-12-08T10:00:00Z,SUCCESS
-TXN1024,CUST_024,1200.50,INR,,2025-12-08T11:00:00Z,SUCCESS
-TXN1025,CUST_025,500.00,INR,777 Redwood Way,2025-12-08T12:00:00Z,SUCCESS
-... (Rows 26-90 omitted for brevity; follow pattern of repeating amounts 500.00, 1200.50, and 300.00 to lower uniqueness)
-TXN1091,CUST_091,500.00,inr,,2025-12-25T10:00:00Z,SUCCESS
-TXN1092,CUST_092,1200.50,INR,888 Cypress St,2025-12-25T11:00:00Z,SUCCESS
-TXN1093,CUST_093,300.00,inr,,2025-12-26T09:00:00Z,SUCCESS
-TXN1094,CUST_094,,INR,999 Juniper Ln,2025-12-26T10:00:00Z,SUCCESS
-TXN1095,CUST_095,500.00,INR,,2025-12-27T12:00:00Z,SUCCESS
-TXN1096,CUST_096,1200.50,inr,101 Aspen Ct,2025-12-27T14:00:00Z,SUCCESS
-TXN1097,CUST_097,300.00,INR,,2025-12-28T10:00:00Z,SUCCESS
-TXN1098,CUST_098,75.25,INR,202 Beech Rd,2025-12-28T11:00:00Z,SUCCESS
-TXN1099,CUST_099,500.00,inr,,2025-12-29T09:00:00Z,SUCCESS
-TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
-      `;
-
-      const result = await model.generateContent([systemPrompt, ...messages.map(m => `${m.role}: ${m.content}`), input]);
-      const response = await result.response;
-      const text = response.text();
-
-      setMessages((prev) => [...prev, { role: "bot", content: text }]);
+      await chatWithAIStream({
+        auditContext: auditContext,
+        messages: messages.map(m => ({ role: m.role, content: m.content })),
+        userInput: currentInput,
+        onChunk: (chunk) => {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            return [...prev.slice(0, -1), { ...last, content: last.content + chunk }];
+          });
+          setIsTyping(false); // Stop loader once we start getting tokens
+        }
+      });
     } catch (err) {
-      console.error("Gemini Error:", err);
-      setMessages((prev) => [...prev, { role: "bot", content: "I encountered an error connecting to the logic engine. Please check your API key." }]);
+      console.error("Chat Error:", err);
+      setMessages((prev) => [
+        ...prev.slice(0, -1), 
+        { role: "bot", content: "I encountered an error connecting to the AI Auditor engine. Please try again later." }
+      ]);
     } finally {
       setIsTyping(false);
     }
   };
 
   const clearChat = () => {
-    setMessages([{ role: "bot", content: "Chat history cleared. How can I help with the audit?" }]);
+    const initialMessage = [{ role: "bot", content: "Chat history cleared. How can I help with the audit?" }];
+    setMessages(initialMessage);
+    localStorage.removeItem("dqs_chat_history");
   };
 
+  const suggestedQuestions = [
+    "What are the top 3 critical issues?",
+    "Explain the compliance risks.",
+    "Show remediation priority.",
+  ];
+
+  const handleSuggestedClick = (q) => {
+    setInput(q);
+  };
+
+  if (!auditContext) {
+    return (
+      <div className="flex flex-col min-h-[600px] h-[85vh] w-full max-w-6xl mx-auto bg-white/[0.02] border border-white/10 rounded-[2.5rem] backdrop-blur-xl items-center justify-center p-12 text-center">
+        <div className="size-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6">
+          <Bot className="size-10 text-indigo-400" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-2">No Audit context found</h3>
+        <p className="text-slate-400 max-w-sm mb-8">
+          Please upload a dataset or connect to a data source first so I can analyze the results and answer your questions.
+        </p>
+        <button 
+          onClick={() => window.location.href = '/csv'}
+          className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold transition-all"
+        >
+          Go to Audit
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-[600px] w-full max-w-4xl mx-auto bg-white/[0.02] border border-white/10 rounded-[2.5rem] backdrop-blur-xl overflow-hidden relative shadow-2xl">
-      {/* Subtle Internal Glow */}
+    <div className="flex flex-col h-[85vh] w-full max-w-6xl mx-auto bg-white/[0.02] border border-white/10 rounded-[2.5rem] backdrop-blur-xl overflow-hidden relative shadow-2xl">
       <div className="absolute -top-24 -right-24 size-64 bg-indigo-600/10 blur-[80px] rounded-full pointer-events-none" />
       
-      {/* Chat Header */}
       <div className="px-8 py-5 border-b border-white/10 bg-white/[0.02] flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
           <div className="size-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
@@ -113,7 +120,7 @@ TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
               Audit Intelligence
               <span className="size-2 bg-emerald-500 rounded-full animate-pulse" />
             </h3>
-            <p className="text-xs text-slate-500">Powered by Gemini 1.5</p>
+            <p className="text-xs text-slate-500">Real-time Analysis</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -126,8 +133,10 @@ TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide">
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-8 space-y-6 scroll-smooth"
+      >
         <AnimatePresence mode="popLayout">
           {messages.map((msg, idx) => (
             <motion.div
@@ -136,7 +145,7 @@ TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
               animate={{ opacity: 1, y: 0, scale: 1 }}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`flex gap-4 max-w-[85%] ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+              <div className={`flex gap-4 max-w-[90%] ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                 <div className={`size-8 rounded-lg flex-shrink-0 flex items-center justify-center border ${
                   msg.role === "user" 
                   ? "bg-indigo-600 border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.4)]" 
@@ -149,12 +158,20 @@ TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
                   ? "bg-indigo-600/20 border border-indigo-500/30 text-indigo-50" 
                   : "bg-white/5 border border-white/10 text-slate-300"
                 }`}>
-                  {msg.content}
+                  {msg.role === "bot" ? (
+                    <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-table:border prose-table:border-white/10 prose-th:bg-white/5 prose-th:px-2 prose-td:px-2">
+                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content || (isTyping && idx === messages.length - 1 ? "..." : "")}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-wrap">{msg.content}</div>
+                  )}
                 </div>
               </div>
             </motion.div>
           ))}
-          {isTyping && (
+          {isTyping && messages[messages.length - 1]?.content === "" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-4">
               <div className="size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                 <Loader2 size={14} className="text-indigo-400 animate-spin" />
@@ -172,8 +189,20 @@ TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
         <div ref={scrollRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-6 bg-white/[0.02] border-t border-white/10 relative z-10">
+        {!isTyping && messages.length === 1 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {suggestedQuestions.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => handleSuggestedClick(q)}
+                className="px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs text-slate-400 transition-all active:scale-95"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="relative flex items-center">
           <input
             type="text"
@@ -196,4 +225,4 @@ TXN1100,CUST_100,1200.50,INR,303 Sycamore Dr,2025-12-29T10:00:00Z,SUCCESS
   );
 };
 
-export default Chatbot; 
+export default Chatbot;

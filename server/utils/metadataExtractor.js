@@ -1,19 +1,26 @@
-import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 
-/* ---------------------------
-  Helper: Infer column type
----------------------------- */
+const DATE_PATTERNS = [
+  /^\d{4}-\d{2}-\d{2}/,        // YYYY-MM-DD
+  /^\d{2}\/\d{2}\/\d{4}/,       // MM/DD/YYYY or DD/MM/YYYY
+  /^\d{2}\/\d{4}/,             // MM/YYYY
+  /^\d{4}$/                    // YYYY (only if reasonable range)
+];
+
+const isLikelyDate = (v) => {
+  if (typeof v !== 'string' || v.trim() === '') return false;
+  if (!isNaN(v) && (v.length > 4 || Number(v) > 2100)) return false; 
+  return DATE_PATTERNS.some(p => p.test(v)) && !isNaN(Date.parse(v));
+};
+
 export const inferType = (values) => {
-  if (values.every((v) => !isNaN(v))) return "numeric";
-  if (values.every((v) => !isNaN(Date.parse(v)))) return "datetime";
+  if (values.every((v) => !isNaN(v) && v !== "")) return "numeric";
+  if (values.every((v) => isLikelyDate(v))) return "datetime";
   return "string";
 };
 
-/* ---------------------------
-  Dataset-level metadata
----------------------------- */
 export const extractDatasetMetadata = (rows, sourceName, domain = "Unknown") => ({
-  dataset_id: uuidv4(),
+  dataset_id: crypto.randomUUID(),
   dataset_name: sourceName,
   row_count: rows.length,
   column_count: rows.length ? Object.keys(rows[0]).length : 0,
@@ -21,9 +28,6 @@ export const extractDatasetMetadata = (rows, sourceName, domain = "Unknown") => 
   ingestion_timestamp: new Date().toISOString(),
 });
 
-/* ---------------------------
-  Column-level metadata
----------------------------- */
 export const extractColumnMetadata = (rows) => {
   const columns = Object.keys(rows[0] || {});
   const rowCount = rows.length;
@@ -45,9 +49,6 @@ export const extractColumnMetadata = (rows) => {
   });
 };
 
-/* ---------------------------
-  Numeric stats
----------------------------- */
 export const extractNumericStats = (rows) => {
   const stats = {};
   Object.keys(rows[0] || {}).forEach((col) => {
@@ -64,9 +65,6 @@ export const extractNumericStats = (rows) => {
   return stats;
 };
 
-/* ---------------------------
-  Categorical stats
----------------------------- */
 export const extractCategoricalStats = (rows) => {
   const stats = {};
   Object.keys(rows[0] || {}).forEach((col) => {
@@ -84,14 +82,20 @@ export const extractCategoricalStats = (rows) => {
   return stats;
 };
 
-/* ---------------------------
-  Temporal stats
----------------------------- */
 export const extractTemporalStats = (rows) => {
   const stats = {};
   Object.keys(rows[0] || {}).forEach((col) => {
-    const dates = rows.map((r) => new Date(r[col])).filter((d) => !isNaN(d));
-    if (!dates.length) return;
+    const colLower = col.toLowerCase();
+    if (colLower === "id" || colLower.includes("_id") || colLower.includes("client_id")) return;
+    const dateValues = rows.map((r) => r[col]).filter((v) => isLikelyDate(v));
+    const isYearColumn = colLower.includes("year") || colLower.includes("date") || colLower.includes("time") || colLower.includes("at");
+    const dates = dateValues.map((v) => {
+        if (/^\d{4}$/.test(v) && !isYearColumn) return null;
+        const d = new Date(v);
+        return isNaN(d) ? null : d;
+    }).filter(Boolean);
+    
+    if (dates.length < rows.length * 0.1) return; 
 
     const now = new Date();
     stats[col] = {
@@ -105,9 +109,6 @@ export const extractTemporalStats = (rows) => {
   return stats;
 };
 
-/* ---------------------------
-  Pattern stats (regex)
----------------------------- */
 export const extractPatterns = (rows) => {
   const patterns = {};
   Object.keys(rows[0] || {}).forEach((col) => {
@@ -123,9 +124,6 @@ export const extractPatterns = (rows) => {
   return patterns;
 };
 
-/* ---------------------------
-  Compliance flags
----------------------------- */
 export const extractComplianceFlags = (columns) => {
   const columnNamesLower = columns.map((c) => c.column_name.toLowerCase());
   return {
@@ -141,9 +139,6 @@ export const extractComplianceFlags = (columns) => {
   };
 };
 
-/* ---------------------------
-  Build complete metadata object
----------------------------- */
 export const buildFullMetadata = (rows, sourceName, domain = "Unknown") => {
   const dataset = extractDatasetMetadata(rows, sourceName, domain);
   const columns = extractColumnMetadata(rows);

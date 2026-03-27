@@ -1,6 +1,4 @@
-// table.controller.js
-import { MongoClient } from "mongodb";
-import { Client as PGClient } from "pg";
+import { connectToMongo, connectToPostgres } from "../utils/db.js";
 import { buildFullMetadata } from "../utils/metadataExtractor.js";
 
 /* ---------------------------
@@ -12,11 +10,9 @@ export const tableMetaDataExtractionMongo = async (req, res) => {
     if (!uri || !dbName || !collectionName)
       return res.status(400).json({ message: "Missing parameters" });
 
-    const client = new MongoClient(uri);
-    await client.connect();
+    const client = await connectToMongo(uri);
     const collection = client.db(dbName).collection(collectionName);
-    const rows = await collection.find({}).toArray();
-    await client.close();
+    const rows = await collection.find({}).limit(1000).toArray(); // Added limit for safety
 
     const metadata = buildFullMetadata(rows, collectionName);
     res.json(metadata);
@@ -39,11 +35,9 @@ export const tableMetaDataExtractionPostgres = async (req, res) => {
       return res.status(400).json({ message: "Invalid table name" });
     }
 
-    const client = new PGClient({ connectionString });
-    await client.connect();
+    const client = await connectToPostgres(connectionString);
 
     const { rows } = await client.query(`SELECT * FROM "${tableName}" LIMIT 1000`);
-    await client.end();
 
     const metadata = buildFullMetadata(rows, tableName);
     res.json(metadata);

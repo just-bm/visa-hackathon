@@ -6,13 +6,13 @@ from services.llm import chat_chain, llm, summarize_history
 from prompt import CHAT_PROMPT
 from core.logger import logger
 
-router = APIRouter(prefix="/chat", tags=["Chat"])
+router = APIRouter(prefix="", tags=["Chat"])
 
 @router.post("", response_model=ChatResponse)
 async def chat_with_auditor(request: ChatRequest):
     """Standard chat endpoint (non-streaming)."""
     try:
-        history_str = summarize_history(request.messages)
+        history_str = await summarize_history(request.messages)
         response = chat_chain.invoke({
             "audit_context": request.audit_context.model_dump_json(),
             "chat_history": history_str,
@@ -30,7 +30,7 @@ async def chat_with_auditor_stream(request: ChatRequest):
     logger.info("Streaming chat request received")
     async def event_generator():
         try:
-            history_str = summarize_history(request.messages)
+            history_str = await summarize_history(request.messages)
             prompt = CHAT_PROMPT.format(
                 audit_context=request.audit_context.model_dump_json(),
                 chat_history=history_str,

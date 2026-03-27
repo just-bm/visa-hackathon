@@ -1,8 +1,13 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://visa-hackathon-in3q.onrender.com/api";
+const NODE_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const AI_BASE_URL = import.meta.env.VITE_AI_URL || "http://localhost:8000";
 
-export const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+export const nodeInstance = axios.create({
+  baseURL: NODE_BASE_URL,
   withCredentials: true,
+});
+
+export const aiInstance = axios.create({
+  baseURL: AI_BASE_URL,
 });

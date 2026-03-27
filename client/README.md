@@ -1,16 +1,61 @@
-# React + Vite
+# DQS-AI Frontend 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The official React-based dashboard for **DQS-AI** (Data Quality Service AI). This frontend provides an intuitive interface for payment professionals and auditors to analyze datasets, connect to live databases, and interact with the GenAI-powered Auditor Agent.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Multi-Source Analysis**: Upload CSVs, connect to PostgreSQL/MongoDB, or analyze REST API endpoints.
+- **Explainable AI Insights**: View detailed Data Quality Scores (0-100) with natural language explanations for every anomaly.
+- **Interactive Chat Auditor**: Real-time streaming chat with a specialized AI agent (DQS-AI) to discuss remediation steps and regulatory risks.
+- **Remediation Reports**: Generate and export downloadable Markdown reports with prioritized fix actions.
+- **Premium UI/UX**: Built with a sleek dark-mode aesthetic, smooth Framer Motion animations, and responsive layouts.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **API Client**: [Axios](https://axios-http.com/)
+- **Notifications**: [React Toastify](https://fkhadra.github.io/react-toastify/)
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+
+### Installation
+
+1.  Navigate to the client directory:
+    ```bash
+    cd client
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+### Running Locally
+
+To start the development server:
+```bash
+npm run dev
+```
+The app will be available at `http://localhost:3000` (controlled via `vite.config.js`).
+
+## ⚙️ Environment Variables
+
+Create a `.env` file in the `client/` directory with the following variables:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_AI_URL=http://localhost:8000
+```
+
+- `VITE_API_URL`: Points to the Node.js backend (metadata extraction).
+- `VITE_AI_URL`: Points to the FastAPI service (GenAI analysis).
+
+---
+Built for the **Shaastra 2026 AI Hackathon** (Visa Track).

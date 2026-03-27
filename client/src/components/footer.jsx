@@ -8,36 +8,40 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={{ duration: 1 }}
         >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14 border-t border-slate-800 pt-16">
                 <div className="sm:col-span-2 lg:col-span-1">
-                    <a href="https://prebuiltui.com?utm_source=agentix">
-                        <img className="h-9 w-auto" src="/assets/logo.svg" width={138} height={36} alt="logo" />
-                    </a>
-                    <p className="text-sm/7 mt-6">PrebuiltUI is a free and open-source UI component library with over 300+ beautifully crafted, customizable components built with Tailwind CSS.</p>
+                    <div className="flex items-center gap-2">
+                        <img className="h-8 w-auto" src="/assets/logo.svg" width={138} height={36} alt="logo" />
+                        <span className="text-xl font-bold text-white tracking-tight">DQS-AI</span>
+                    </div>
+                    <p className="text-sm/7 mt-6 max-w-sm">
+                        GenAI-Powered Data Quality Scoring Agent for Payments. Standardizing integrity, transparency, and compliance in global financial datasets.
+                    </p>
                 </div>
                 <div className="flex flex-col lg:items-center lg:justify-center">
                     <div className="flex flex-col text-sm space-y-2.5">
-                        <h2 className="font-semibold mb-5 text-white">Company</h2>
-                        <a className="hover:text-slate-500 transition" href="#">About us</a>
-                        <a className="hover:text-slate-500 transition" href="#">Careers<span className="text-xs text-white bg-indigo-600 rounded-md ml-2 px-2 py-1">We’re hiring!</span></a>
-                        <a className="hover:text-slate-500 transition" href="#">Contact us</a>
-                        <a className="hover:text-slate-500 transition" href="#">Privacy policy</a>
+                        <h2 className="font-semibold mb-5 text-white underline decoration-indigo-500 underline-offset-8">Resources</h2>
+                        <a className="hover:text-indigo-400 transition" href="/#docs">Documentation</a>
+                        <a className="hover:text-indigo-400 transition" href="/#paper">Research Paper</a>
+                        <a className="hover:text-indigo-400 transition" href="https://github.com/Balaji-R-05/visa-hackathon">GitHub Repository</a>
+                        <a className="hover:text-indigo-400 transition" href="/#api">API Reference</a>
                     </div>
                 </div>
                 <div>
-                    <h2 className="font-semibold text-white mb-5">Subscribe to our newsletter</h2>
-                    <div className="text-sm space-y-6 max-w-sm">
-                        <p>The latest news, articles, and resources, sent to your inbox weekly.</p>
-                        <div className="flex items-center justify-center gap-2 p-2 rounded-md bg-slate-900">
-                            <input className="outline-none w-full max-w-64 py-2 rounded px-2" type="email" placeholder="Enter your email" />
-                            <button className="bg-indigo-600 px-4 py-2 text-white rounded">Subscribe</button>
+                    <h2 className="font-semibold text-white mb-5 underline decoration-indigo-500 underline-offset-8">Shaastra 2026</h2>
+                    <div className="text-sm space-y-4 max-w-sm">
+                        <p>Built for the 24-Hour AI Hackathon (Visa Track) at IIT Madras.</p>
+                        <div className="flex items-center gap-4 mt-4">
+                           <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-indigo-400 border border-slate-700">Payments</span>
+                           <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-indigo-400 border border-slate-700">GenAI</span>
+                           <span className="px-3 py-1 bg-slate-800 rounded-full text-xs text-indigo-400 border border-slate-700">RegTech</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <p className="py-4 text-center border-t mt-6 border-slate-700">
-                Copyright 2025 © <a href="https://prebuiltui.com?utm_source=agentix">PrebuiltUI</a> All Right Reserved.
+            <p className="py-8 text-center border-t mt-12 border-slate-800 text-xs">
+                Copyright 2026 © DQS-AI. All Rights Reserved. Built with ❤️ for Shaastra.
             </p>
         </motion.footer>
     );
-};
+};

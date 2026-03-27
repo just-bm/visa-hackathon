@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, BarChart3, X, FileText, ChevronRight, Sparkles } from "lucide-react";
+import { Upload, CheckCircle, BarChart3, X, FileText, ChevronRight } from "lucide-react";
 import { evaluateDataset } from "../api/api.js";
+import { SAMPLE_ANALYSIS_RESULT } from "../api/sampleData.js";
 import {useNavigate} from "react-router";
 const Csv = ({ onResult }) => {
   const [file, setFile] = useState(null);
@@ -49,6 +50,15 @@ const Csv = ({ onResult }) => {
     }
   };
 
+  const handleTrySample = () => {
+    setLoading(true);
+    setTimeout(() => {
+      if (onResult) onResult(SAMPLE_ANALYSIS_RESULT);
+      navigate('/result', { state: { data: SAMPLE_ANALYSIS_RESULT } });
+      setLoading(false);
+    }, 1500);
+  };
+
   return (
     <div className="relative min-h-screen bg-[#050505] text-white font-sans overflow-hidden selection:bg-indigo-500/30">
       
@@ -86,6 +96,16 @@ const Csv = ({ onResult }) => {
             >
               Upload your payment datasets for automated integrity checks, anomaly detection, and regulatory compliance scoring.
             </motion.p>
+            
+            {!fileName && (
+              <motion.button
+                onClick={handleTrySample}
+                className="mt-8 text-xs font-bold text-indigo-400/60 hover:text-indigo-400 uppercase tracking-widest flex items-center gap-2 mx-auto transition-all"
+              >
+                <div className="size-1 bg-indigo-500 rounded-full animate-pulse" />
+                No data? Try with sample dataset
+              </motion.button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -101,7 +121,7 @@ const Csv = ({ onResult }) => {
               >
                 <div className="relative border border-dashed border-white/10 rounded-[2.3rem] p-12 flex flex-col items-center overflow-hidden">
                   {/* Grainy Texture Overlay */}
-                  <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
                   
                   <motion.div 
                     animate={dragActive ? { scale: 1.1 } : { scale: 1 }}

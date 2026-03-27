@@ -6,86 +6,11 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
-// Hardcoded data based on your JSON
-const HARDCODED_DATA = {
-    "status": "success",
-    "genai_insights": {
-        "data_quality_issues": {
-            "Completeness": {
-                "issue": "Sparse Attribute Population",
-                "affected_columns": ["merchant_tax_id", "billing_postal_code", "secondary_auth_method"],
-                "description": "Critical merchant metadata is missing in 14.2% of records. Merchant_tax_id shows a null-density spike in regional sub-segments."
-            },
-            "Accuracy": {
-                "issue": "Cross-Field Validation Failure",
-                "affected_columns": ["base_amount", "tax_total", "grand_total"],
-                "description": "Discrepancies detected between sum of line items and grand_total in 2.4% of high-value transactions."
-            },
-            "Consistency": {
-                "issue": "Temporal ISO-8601 Variance",
-                "affected_columns": ["settlement_date"],
-                "description": "Mixed date formats detected (YYYY-MM-DD vs DD/MM/YYYY) across legacy API ingestion points."
-            },
-            "Validity": {
-                "issue": "Out-of-Range Financial Parameters",
-                "affected_columns": ["processing_fee", "authorization_code"],
-                "description": "Processing fees in 128 records exceed the 5% threshold of transaction value. Authorization codes contain non-alphanumeric characters."
-            },
-            "Timeliness": {
-                "issue": "Ingestion Latency Drift",
-                "affected_columns": ["event_timestamp", "processed_timestamp"],
-                "description": "Mean delta between event occurrence and processing time exceeds the 300ms SLA for 8% of real-time packets."
-            },
-            "Uniqueness": {
-                "issue": "Idempotency Key Duplication",
-                "affected_columns": ["transaction_uuid"],
-                "description": "Detected 42 instances of duplicate UUIDs, suggesting potential double-billing or retry-logic failures."
-            },
-            "Integrity": {
-                "issue": "Orphaned Transaction Records",
-                "affected_columns": ["parent_order_id"],
-                "description": "Referential integrity check failed for records pointing to non-existent Order IDs in the downstream ledger."
-            }
-        },
-        "remediation_actions": [
-            {
-                "action": "Implement Schema Enforcement",
-                "priority": 1,
-                "description": "Deploy strict pydantic/zod validation at the ingestion layer to block non-ISO-8601 date strings."
-            },
-            {
-                "action": "Deduplication Pipeline Audit",
-                "priority": 2,
-                "description": "Recalibrate idempotency filters to ensure transaction_uuid remains a unique primary key."
-            },
-            {
-                "action": "Automated Backfill",
-                "priority": 3,
-                "description": "Trigger automated lookup for missing merchant_tax_id attributes from the master entity registry."
-            }
-        ],
-        "regulatory_compliance_risks": [
-            "GDPR and PCI-DSS compliance is at moderate risk due to duplicate transaction UUIDs and inconsistent merchant tax documentation."
-        ],
-        "composite_dqs": 0.84,
-        "dimension_scores": {
-            "Completeness": 0.82,
-            "Validity": 0.78,
-            "Consistency": 0.65,
-            "Timeliness": 0.91,
-            "Uniqueness": 0.94,
-            "Accuracy": 0.88
-        }
-    }
-};
-
-const ResultApi = ({ result = HARDCODED_DATA }) => {
+const ResultApi = ({ result }) => {
     const navigate = useNavigate();
 
-    // Safety check in case the passed prop is null
-    const finalResult = result || HARDCODED_DATA;
-
-    if (!finalResult || !finalResult.genai_insights) {
+    const data = result?.genai_insights || result;
+    if (!data || !data.dimension_scores) {
         return (
             <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4">
                 <ShieldAlert className="size-16 text-indigo-500 mb-4" />
@@ -103,8 +28,7 @@ const ResultApi = ({ result = HARDCODED_DATA }) => {
         );
     }
 
-    const { genai_insights } = finalResult;
-    const { dimension_scores, data_quality_issues, remediation_actions, composite_dqs, regulatory_compliance_risks } = genai_insights;
+    const { dimension_scores, data_quality_issues, remediation_actions, composite_dqs, regulatory_compliance_risks } = data;
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -221,14 +145,15 @@ const ResultApi = ({ result = HARDCODED_DATA }) => {
                                 <AlertTriangle className="size-5 text-amber-400" /> Detected Anomalies
                             </h3>
                             <div className="space-y-4">
-                                {Object.entries(data_quality_issues).map(([key, data]) => (
-                                    data.affected_columns.length > 0 && (
-                                        <div key={key} className="group bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 rounded-3xl p-6 transition-all">
+                                {(data_quality_issues || []).map((data, index) => (
+                                    data?.affected_columns?.length > 0 && data.issue !== "No issues identified" && (
+                                        <div key={data.dimension || index} className="group bg-white/[0.02] hover:bg-white/[0.04] border border-white/10 rounded-3xl p-6 transition-all">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div>
-                                                    <h4 className="font-bold text-lg text-slate-200">{key} Issue</h4>
+                                                    <h4 className="font-bold text-lg text-slate-200">{data.dimension} Issue</h4>
                                                     <p className="text-amber-400/80 text-sm font-medium">{data.issue}</p>
                                                 </div>
+
                                                 <div className="px-3 py-1 bg-white/5 rounded-full border border-white/10 text-[10px] uppercase tracking-widest text-slate-500">
                                                     Criticality: High
                                                 </div>

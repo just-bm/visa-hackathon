@@ -1,87 +1,87 @@
-# DQS-AI: GenAI-Powered Data Quality Scoring Agent for Payments
+# DQS-AI: Agentic Data Quality Scoring Framework
 
-Payment organizations process massive volumes of transactional and customer data across multiple systems. However, there is **no universal, objective, or explainable way** to measure data quality across critical dimensions, leading to unreliable analytics, regulatory risk, and costly manual investigations.
+DQS-AI is a next-generation automated data quality auditing system that combines deterministic rule-based scoring with Large Language Model (LLM) reasoning to provide 360-degree visibility into dataset integrity.
 
-
-
-
-## 💡 Solution
-DQS-AI is an autonomous agent that:
-- Analyzes any payments-related dataset
-- Scores it across **standard enterprise data quality dimensions**
-- Produces a **single composite Data Quality Score (DQS)**
-- Uses GenAI to explain issues and recommend prioritized fixes
+Developed for academic research and mini-project submission, it demonstrates the power of **Agentic AI** in the domain of Data Engineering and Governance.
 
 ---
 
-## 🧠 Key Features
-- ✅ **Universal Data Quality Score (0–100)**
-- 📊 **Dimension-wise Scoring**
-  - Completeness
-  - Accuracy
-  - Consistency
-  - Validity
-  - Uniqueness
-  - Timeliness
-  - Integrity
-- 🧠 **Explainable GenAI Insights**
-- 🛠️ **Actionable Remediation Recommendations**
-- 🔐 **Privacy-First Design** (No raw data stored)
+## 📸 Visual Walkthrough
+
+| **Dashboard Home** | **CSV Audit Interface** |
+|:---:|:---:|
+| ![Dashboard](./images/home.png) | ![CSV](./images/csv.png) |
+
+| **SQL Database Connection** | **NoSQL Database Analysis** |
+|:---:|:---:|
+| ![SQL](./images/sql.png) | ![NoSQL](./images/nosql.png) |
+
+| **API Endpoint Audit** | **AI Chatbot Reasoning** |
+|:---:|:---:|
+| ![API](./images/api.png) | ![Chatbot](./images/chatbot.png) |
 
 ---
 
+## 🚀 Key Features
 
+- **Multi-Source Auditing**: Support for CSV uploads, PostgreSQL, and MongoDB connections.  
+- **Hybrid Scoring Engine**: Combines high-speed rule-based checks (PII detection, nullity, type-matching) with LLM-powered deep analysis.
+- **Agentic Insights**: A streaming AI Chatbot that understands your audit context and provides remediation roadmaps.  
+- **Regulatory Compliance**: Mapping of data anomalies to GDPR, CCPA, and AML risk factors.
+- **Professional Reporting**: One-click generation of printable PDF/Markdown audit reports.
+- **Interactive Evaluation**: Built-in benchmarking suite to measure AI precision, recall, and F1 scores.
 
-## 🏗️ System Architecture
-User
-│
-▼
-Web UI (Dataset Upload & Dashboard)
-│
-▼
-DQ Orchestrator Agent
-│
-├── Metadata Extractor
-├── Rule-Based Scoring Engine
-├── Composite DQS Calculator
-└── GenAI Insight Agent
-    ├─ Plain-language explanations
-    ├─ Risk & regulatory impact
-    └─ Fix recommendations
+## 🏗️ Architecture
 
----
+- **Frontend**: React (Vite) + Tailwind CSS + Framer Motion (for premium UI/UX).
+- **Backend (Orchestrator)**: Express.js (Node.js) handling database connectors and metadata extraction.
+- **AI Service**: FastAPI (Python) + LangChain + Groq (LLM Inference) for rapid GenAI reasoning.
+- **Database Support**: MongoDB and PostgreSQL.
 
+## 🛠️ Quick Start
 
-## 🔢 Scoring Logic
+### 1. Prerequisites
+- Node.js (v18+)
+- Python (3.10+)
+- Groq API Key (gsk_...)
 
-Each data quality dimension is scored on a **0–100 scale** using deterministic, rule-based checks.
+### 2. Installation & Setup
 
+#### AI Service
+```bash
+cd ai-services
+pip install -r requirements.txt
+# Add GROQ_API_KEY to .env
+python main.py
+```
 
----
+#### Backend Server
+```bash
+cd server
+npm install
+node index.js
+```
 
+#### Client
+```bash
+cd client
+npm install
+npm run dev
+```
 
-## 📊 Example Output
-- **Overall DQS:** 71.3
-- **AI Insight:**  
-  > “Completeness and timeliness are the primary risks. Missing KYC address fields and outdated verification records may impact regulatory readiness.”
-- **Top Recommendations:**
-  1. Refresh KYC records older than 12 months
-  2. Enforce PAN format validation
-  3. Deduplicate customer records
+### 3. Usage
+1. Open `http://localhost:3000`.
+2. Navigate to **CSV Audit** and click **"Try with sample dataset"**.
+3. View the **Composite Quality Score** and anomalies.
+4. Click **"Chat with AI"** to ask specific questions about your data issues.
 
----
+## 🔬 Evaluation & Research
+The system includes a dedicated evaluation framework in the `/evaluation` directory.
+Run the benchmarks to see real-world performance metrics:
+```bash
+cd evaluation
+python run_evaluation.py
+```
 
-
-## 🔐 Privacy & Compliance
-- No sensitive transaction data is stored
-- Only metadata, scores, and insights are retained
-- Designed with regulatory and audit-readiness in mind
-
----
-
-
-
-
-
-Built as part of Shaastra 2026 – 24 Hour AI Hackathon (Visa Track)
-Focus area: Payments, FinTech, GenAI, RegTech
+## 📜 Academic Context
+This project was built to explore the intersection of **Generative AI** and **Data Quality Management**. By offloading the "reasoning" of why a column is defective to an LLM, we reduce the manual burden on Data Stewards and accelerate the remediation lifecycle.

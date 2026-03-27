@@ -15,20 +15,11 @@ const Api = ({ onResult }) => {
     setLoading(true);
     
     try {
-      // API call to fetch data
       const data = await apiData({ apiUrl: apiLink });
-      
-      // Artificial delay for the "Analysis" feel
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
       toast.success("Connection successful");
-      
-      // Update parent state if callback provided
       if (onResult) onResult(data);
-
-      // Navigate to results page passing the data in state
-      navigate("/result`", { state: { data: data } });
-      
+      navigate("/result", { state: { data: data } });
       console.log("Analysis Received:", data);
     } catch (err) {
       console.error("Connection failed", err);
@@ -40,8 +31,6 @@ const Api = ({ onResult }) => {
 
   return (
     <div className="relative min-h-screen bg-[#050505] text-white font-sans overflow-hidden selection:bg-indigo-500/30">
-      
-      {/* Background Glow - Consistent with Csv Component */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <svg className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[140%] opacity-50" viewBox="0 0 1440 676" fill="none">
           <rect x="-92" y="-948" width="1624" height="1624" rx="812" fill="url(#db-gradient)" />
@@ -83,7 +72,7 @@ const Api = ({ onResult }) => {
             {/* Input Area */}
             <motion.div className="lg:col-span-2">
               <div className="relative bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl">
-                <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
                 
                 <div className="space-y-8 relative">
                   {/* API Link Input */}

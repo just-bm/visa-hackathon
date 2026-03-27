@@ -4,27 +4,27 @@ import { motion } from "framer-motion";
 export default function AboutOurApps() {
     const sectionData = [
         {
-            title: "Lightning-Fast Performance",
-            description: "Built with speed — minimal load times and optimized.",
+            title: "GenAI Audit Insights",
+            description: "Deep-dive analysis across 7 quality dimensions with explainable AI reasoning.",
             image: "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/aboutSection/flashEmoji.png",
             className: "py-10 border-b border-slate-700 md:py-0 md:border-r md:border-b-0 md:px-10"
         },
         {
-            title: "Beautifully Designed Components",
-            description: "Modern, pixel-perfect UI components ready for any project.",
+            title: "Regulatory Compliance",
+            description: "Automated mapping to KYC, AML, and FATF framework requirements.",
             image: "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/aboutSection/colorsEmoji.png",
             className: "py-10 border-b border-slate-700 md:py-0 lg:border-r md:border-b-0 md:px-10"
         },
         {
-            title: "Plug-and-Play Integration",
-            description: "Simple setup with support for React, Next.js and Tailwind css.",
+            title: "Privacy-First Architecture",
+            description: "We process only metadata and scores. Your sensitive transaction data never leaves your environment.",
             image: "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/aboutSection/puzzelEmoji.png",
             className: "py-10 border-b border-slate-700 md:py-0 md:border-b-0 md:px-10"
         },
     ];
     return (
         <section className="flex flex-col items-center" id="about">
-            <SectionTitle title="About our apps" description="A visual collection of our most recent works - each piece crafted with intention, emotion, and style." />
+            <SectionTitle title="Engineered for Trust" description="DQS-AI bridges the gap between raw payment data and financial regulatory excellence." />
             <div className="relative max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-8 md:px-0 mt-18">
                 {sectionData.map((data, index) => (
                     <motion.div key={data.title} className={data.className}

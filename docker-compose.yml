@@ -1,32 +1,63 @@
 services:
-  # ── React Frontend (nginx) ──────────────────────────────────
+  # ── React Frontend (nginx) ────────────────────────────────
   client:
-    build: ./client
+    container_name: visa-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.client
     ports:
       - "80:80"
+    env_file:
+      - ./client/.env
     depends_on:
-      - server
+      server:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - visa-network
 
-  # ── Express API Server ──────────────────────────────────────
+  # ── Express API Server ────────────────────────────────────
   server:
-    build: ./server
+    container_name: visa-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile.server
     ports:
       - "5000:5000"
-    environment:
-      - PORT=5000
-      - CORS_ORIGIN=http://localhost
-      - AI_SERVICE_URL=http://ai-services:8000
+    env_file:
+      - ./server/.env
     depends_on:
-      - ai-services
+      ai-services:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - visa-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # ── FastAPI AI Service ──────────────────────────────────────
+  # ── FastAPI AI Service ────────────────────────────────────
   ai-services:
-    build: ./ai-services
+    container_name: visa-ai-services
+    build:
+      context: ./ai-services
+      dockerfile: Dockerfile.ai-services
     ports:
       - "8000:8000"
-    environment:
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - GROQ_MODEL=${GROQ_MODEL:-mixtral-8x7b-32768}
+    env_file:
+      - ./ai-services/.env
     restart: unless-stopped
+    networks:
+      - visa-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ── Shared Network ──────────────────────────────────────────
+networks:
+  visa-network:
+    driver: bridge

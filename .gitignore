@@ -5,6 +5,8 @@ __pycache__
 venv
 *.pyc
 dist
+samples
+.vscode
 
 paper-structure.md
-evaluation
+rag*
